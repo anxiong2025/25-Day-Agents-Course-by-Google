@@ -130,7 +130,6 @@ uv pip install langgraph-checkpoint-sqlite
 ### 2. 运行 HITL 服务
 
 ```bash
-# Terminal 1 - 启动服务
 uv run python -m langgraph_agent.server
 ```
 
@@ -140,27 +139,33 @@ uv run python -m langgraph_agent.server
 Day 16: Human-in-the-Loop Agent Server
 ============================================================
 
-API 端点:
-  Base URL: http://localhost:8016
+访问地址:
+  Web UI:   http://localhost:8016/ui   <- 推荐
   API Docs: http://localhost:8016/docs
-
-主要功能:
-  POST /tasks           - 创建新任务
-  GET  /tasks           - 获取任务列表
-  GET  /tasks/pending   - 获取待审批任务
-  POST /tasks/{id}/approve - 批准任务
-  POST /tasks/{id}/reject  - 拒绝任务
 
 审批超时: 300 秒
 ============================================================
 ```
 
+### 3. 打开 Web UI（推荐）
+
+浏览器访问: **http://localhost:8016/ui**
+
+![Web UI 示意](static/ui-preview.png)
+
+Web UI 功能：
+- 📝 提交请求（带快捷示例按钮）
+- ⏳ 查看待审批任务
+- ✅❌ 一键批准/拒绝
+- 📋 任务历史和统计
+
+### 4. 或使用命令行客户端
+
 ```bash
-# Terminal 2 - 运行交互式客户端
 uv run python -m client.hitl_client
 ```
 
-### 3. 完整演示流程
+### 5. 完整演示流程
 
 ```bash
 # 1. 启动服务
@@ -175,7 +180,7 @@ uv run python -m client.hitl_client
 # - 中风险任务（发送邮件）→ 等待审批 → 批准
 ```
 
-### 4. 使用 curl 测试
+### 6. 使用 curl 测试（可选）
 
 ```bash
 # 场景 1: 低风险查询 - 直接返回结果

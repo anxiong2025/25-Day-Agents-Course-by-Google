@@ -25,6 +25,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 # 添加项目根目录到路径
@@ -200,6 +202,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 静态文件服务（Web UI）
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+# ============================================================
+# Web UI 入口
+# ============================================================
+
+@app.get("/ui", tags=["Web UI"])
+async def web_ui():
+    """Web UI 入口页面"""
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Web UI not found")
 
 
 # ============================================================
@@ -476,6 +496,7 @@ async def root():
     return {
         "name": "Human-in-the-Loop Agent API",
         "version": "1.0.0",
+        "web_ui": "/ui",
         "docs": "/docs",
         "endpoints": {
             "create_task": "POST /tasks",
@@ -499,11 +520,11 @@ if __name__ == "__main__":
     print("Day 16: Human-in-the-Loop Agent Server")
     print("=" * 60)
     print()
-    print("API 端点:")
-    print("  Base URL: http://localhost:8016")
+    print("访问地址:")
+    print("  Web UI:   http://localhost:8016/ui   <- 推荐")
     print("  API Docs: http://localhost:8016/docs")
     print()
-    print("主要功能:")
+    print("API 端点:")
     print("  POST /tasks           - 创建新任务")
     print("  GET  /tasks           - 获取任务列表")
     print("  GET  /tasks/pending   - 获取待审批任务")

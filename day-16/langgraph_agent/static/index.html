@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业 AI 助手审批系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* 输入区域 */
+        .input-section {
+            grid-column: 1 / -1;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        /* 快捷示例 */
+        .quick-examples {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .example-btn {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* 任务列表 */
+        .task-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .task-id {
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .task-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-waiting_approval {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-approved, .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected, .status-timeout {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .task-content {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .task-risk {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .risk-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .risk-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .risk-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .risk-critical {
+            background: #721c24;
+            color: white;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .task-time {
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* 结果展示 */
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-box h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-content {
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* 统计信息 */
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* 刷新按钮 */
+        .refresh-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .refresh-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* 审批弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #333;
+        }
+
+        .modal-body textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 企业 AI 助手审批系统</h1>
+            <p>Human-in-the-Loop 演示 - Day 16</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- 输入区域 -->
+            <div class="card input-section">
+                <div class="card-header">
+                    📝 提交请求
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" id="userInput" placeholder="输入你的请求，例如：查询今天的销售数据" />
+                        <button class="btn btn-primary" onclick="submitTask()">提交</button>
+                    </div>
+                    <div class="quick-examples">
+                        <span style="color: #666; font-size: 13px;">快速示例：</span>
+                        <button class="example-btn" onclick="setExample('查询今天北京的天气')">🔍 查询天气</button>
+                        <button class="example-btn" onclick="setExample('帮我查一下上个月的销售报表')">📊 查询报表</button>
+                        <button class="example-btn" onclick="setExample('把客户张三的手机号改成 13800138000')">✏️ 修改数据</button>
+                        <button class="example-btn" onclick="setExample('删除离职员工小王的所有数据')">🗑️ 删除数据</button>
+                        <button class="example-btn" onclick="setExample('给所有 VIP 客户发送促销邮件')">📧 批量邮件</button>
+                    </div>
+                    <div id="resultBox" class="result-box">
+                        <h4>📋 执行结果</h4>
+                        <div id="resultContent" class="result-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 待审批任务 -->
+            <div class="card">
+                <div class="card-header">
+                    ⏳ 待审批任务
+                    <button class="refresh-btn" onclick="loadPendingTasks()">🔄 刷新</button>
+                </div>
+                <div class="card-body">
+                    <div id="pendingList" class="task-list">
+                        <div class="loading">
+                            <span class="spinner"></span>加载中...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 所有任务 -->
+            <div class="card">
+                <div class="card-header">
+                    📋 任务历史
+                    <button class="refresh-btn" onclick="loadAllTasks()">🔄 刷新</button>
+                </div>
+                <div class="card-body">
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-number" id="statTotal">0</div>
+                            <div class="stat-label">总任务</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="statCompleted">0</div>
+                            <div class="stat-label">已完成</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="statRejected">0</div>
+                            <div class="stat-label">已拒绝</div>
+                        </div>
+                    </div>
+                    <div id="allTasksList" class="task-list">
+                        <div class="loading">
+                            <span class="spinner"></span>加载中...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 审批弹窗 -->
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">审批任务</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modalTaskInfo" style="margin-bottom: 15px; color: #666;"></p>
+                <textarea id="approvalComment" placeholder="请输入审批意见（可选）"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()" style="background: #6c757d; color: white;">取消</button>
+                <button class="btn btn-danger" onclick="submitApproval(false)">❌ 拒绝</button>
+                <button class="btn btn-success" onclick="submitApproval(true)">✅ 批准</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let currentTaskId = null;
+
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPendingTasks();
+            loadAllTasks();
+
+            // 每 10 秒自动刷新
+            setInterval(() => {
+                loadPendingTasks();
+                loadAllTasks();
+            }, 10000);
+        });
+
+        // 回车提交
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitTask();
+        });
+
+        // 设置示例
+        function setExample(text) {
+            document.getElementById('userInput').value = text;
+            document.getElementById('userInput').focus();
+        }
+
+        // 提交任务
+        async function submitTask() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+
+            if (!message) {
+                alert('请输入请求内容');
+                return;
+            }
+
+            const resultBox = document.getElementById('resultBox');
+            const resultContent = document.getElementById('resultContent');
+
+            resultBox.classList.add('show');
+            resultContent.innerHTML = '<span class="spinner"></span>处理中...';
+
+            try {
+                const response = await fetch(`${API_BASE}/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                let html = `<strong>任务 ID:</strong> ${data.task_id.substring(0, 8)}...\n`;
+                html += `<strong>状态:</strong> ${formatStatus(data.status)}\n`;
+                html += `<strong>风险等级:</strong> ${formatRisk(data.risk_level)}\n`;
+                html += `<strong>需要审批:</strong> ${data.requires_approval ? '是' : '否'}\n\n`;
+                html += `<strong>响应:</strong>\n${data.message}`;
+
+                resultContent.innerHTML = html;
+                input.value = '';
+
+                // 刷新列表
+                loadPendingTasks();
+                loadAllTasks();
+
+            } catch (error) {
+                resultContent.innerHTML = `<span style="color: red;">错误: ${error.message}</span>`;
+            }
+        }
+
+        // 加载待审批任务
+        async function loadPendingTasks() {
+            const container = document.getElementById('pendingList');
+
+            try {
+                const response = await fetch(`${API_BASE}/tasks/pending`);
+                const data = await response.json();
+
+                if (data.tasks.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p>暂无待审批任务</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.tasks.map(task => `
+                    <div class="task-item">
+                        <div class="task-header">
+                            <span class="task-id">${task.task_id.substring(0, 8)}...</span>
+                            <span class="task-status status-${task.status}">${formatStatus(task.status)}</span>
+                        </div>
+                        <div class="task-content">${escapeHtml(task.user_input || '无')}</div>
+                        <div>
+                            <span class="task-risk risk-high">待审批操作</span>
+                            <span class="task-time">${formatTime(task.created_at)}</span>
+                        </div>
+                        <div class="task-actions">
+                            <button class="btn btn-success btn-sm" onclick="openApprovalModal('${task.task_id}', '${escapeHtml(task.pending_action || task.user_input)}')">✅ 批准</button>
+                            <button class="btn btn-danger btn-sm" onclick="openApprovalModal('${task.task_id}', '${escapeHtml(task.pending_action || task.user_input)}')">❌ 拒绝</button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                container.innerHTML = `<div class="empty-state"><p style="color: red;">加载失败: ${error.message}</p></div>`;
+            }
+        }
+
+        // 加载所有任务
+        async function loadAllTasks() {
+            const container = document.getElementById('allTasksList');
+
+            try {
+                const response = await fetch(`${API_BASE}/tasks?limit=20`);
+                const data = await response.json();
+
+                // 更新统计
+                const completed = data.tasks.filter(t => t.status === 'completed').length;
+                const rejected = data.tasks.filter(t => ['rejected', 'timeout'].includes(t.status)).length;
+
+                document.getElementById('statTotal').textContent = data.total;
+                document.getElementById('statCompleted').textContent = completed;
+                document.getElementById('statRejected').textContent = rejected;
+
+                if (data.tasks.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <p>暂无任务记录</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.tasks.map(task => `
+                    <div class="task-item">
+                        <div class="task-header">
+                            <span class="task-id">${task.task_id.substring(0, 8)}...</span>
+                            <span class="task-status status-${task.status}">${formatStatus(task.status)}</span>
+                        </div>
+                        <div class="task-content">${escapeHtml(task.user_input || '无')}</div>
+                        <div class="task-time">${formatTime(task.created_at)}</div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                container.innerHTML = `<div class="empty-state"><p style="color: red;">加载失败: ${error.message}</p></div>`;
+            }
+        }
+
+        // 打开审批弹窗
+        function openApprovalModal(taskId, taskInfo) {
+            currentTaskId = taskId;
+            document.getElementById('modalTaskInfo').textContent = `操作: ${taskInfo}`;
+            document.getElementById('approvalComment').value = '';
+            document.getElementById('approvalModal').classList.add('show');
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('approvalModal').classList.remove('show');
+            currentTaskId = null;
+        }
+
+        // 提交审批
+        async function submitApproval(approved) {
+            if (!currentTaskId) return;
+
+            const comment = document.getElementById('approvalComment').value;
+            const endpoint = approved ? 'approve' : 'reject';
+
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${currentTaskId}/${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        approved,
+                        comment,
+                        approver: 'web_user'
+                    })
+                });
+
+                const data = await response.json();
+
+                closeModal();
+                loadPendingTasks();
+                loadAllTasks();
+
+                // 显示结果
+                const resultBox = document.getElementById('resultBox');
+                const resultContent = document.getElementById('resultContent');
+                resultBox.classList.add('show');
+                resultContent.innerHTML = `<strong>审批结果:</strong> ${approved ? '已批准' : '已拒绝'}\n\n${data.result || data.message}`;
+
+            } catch (error) {
+                alert('审批失败: ' + error.message);
+            }
+        }
+
+        // 工具函数
+        function formatStatus(status) {
+            const map = {
+                'pending': '处理中',
+                'waiting_approval': '待审批',
+                'approved': '已批准',
+                'rejected': '已拒绝',
+                'completed': '已完成',
+                'timeout': '已超时',
+                'failed': '失败'
+            };
+            return map[status] || status;
+        }
+
+        function formatRisk(risk) {
+            const map = {
+                'low': '🟢 低风险',
+                'medium': '🟡 中风险',
+                'high': '🔴 高风险',
+                'critical': '⛔ 关键级'
+            };
+            return map[risk] || risk || '未知';
+        }
+
+        function formatTime(isoTime) {
+            if (!isoTime) return '';
+            const date = new Date(isoTime);
+            return date.toLocaleString('zh-CN');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
