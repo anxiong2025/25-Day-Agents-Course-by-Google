@@ -81,7 +81,8 @@ cp .env.example .env
 | 18 | Cloud API Registry + ADK | ✅ Done |
 | 19 | Register to Gemini Enterprise | ✅ Done |
 | 20 | A2A Extensions: Secure Passport | ✅ Done |
-| 21-25 | Enterprise Topics | ⏳ Pending |
+| 21 | Kaggle Capstone 获奖项目分析 | ✅ Done |
+| 22-25 | Enterprise Topics | ⏳ Pending |
 
 ## Running Daily Exercises
 
